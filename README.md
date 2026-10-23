@@ -40,4 +40,4 @@ código JavaScript respetan los nombres y métodos definidos en el modelo.
 
 ## Autor
 
-Nombre Apellido — Asignatura de Arquitectura de Software
+Maria Cartagena
