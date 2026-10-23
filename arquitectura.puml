@@ -1,0 +1,155 @@
+' ==========================================================
+' PixelVault Games - Modelo 4+1 Vistas de Kruchten (PlantUML)
+' Pegar cada bloque en plantuml.com o en la extensión de VS Code
+' ==========================================================
+
+' ---------- VISTA 1: CASOS DE USO (ESCENARIOS) ----------
+@startuml Vista1_CasosDeUso
+left to right direction
+skinparam packageStyle rectangle
+actor Cliente
+actor "Vendedor / Caja" as Vendedor
+actor Administrador
+
+rectangle "PixelVault System" {
+  usecase "RF1: Consultar Catálogo" as UC1
+  usecase "RF2: Procesar Venta" as UC2
+  usecase "Aplicar Cupón de Descuento" as UC2_1
+  usecase "RF3: Registrar Arriendo" as UC3
+  usecase "Calcular Multa por Mora" as UC3_1
+  usecase "RF4: Gestionar Cliente VIP" as UC4
+  usecase "Aplicar 10% Descuento VIP" as UC4_1
+}
+
+Cliente --> UC1
+Cliente --> UC2
+Vendedor --> UC2
+Vendedor --> UC3
+Administrador --> UC4
+UC2_1 .> UC2 : <<extend>>
+UC3_1 .> UC3 : <<extend>>
+UC4_1 .> UC3 : <<extend>>
+@enduml
+
+' ---------- VISTA 2: LÓGICA (DIAGRAMA DE CLASES) ----------
+@startuml Vista2_Logica
+class Producto {
+  +String id
+  +String nombre
+  +String plataforma
+  +String formato
+  +double precio
+  +int stock
+  +boolean verificarStock(int cantidad)
+}
+class Cliente {
+  +String rut
+  +String nombre
+  +boolean esVIP
+  +int puntos
+  +void acumularPuntos(double monto)
+}
+class Arriendo {
+  +String idArriendo
+  +Date fechaInicio
+  +Date fechaLimite
+  +int diasPactados
+  +double calcularMulta(int diasAtraso)
+}
+class Venta {
+  +String idVenta
+  +double subtotal
+  +double total
+  +void calcularImpuestos()
+}
+class DetalleVenta {
+  +int cantidad
+  +double precioUnitario
+}
+
+Cliente "1" -- "0..*" Arriendo : realiza
+Cliente "1" -- "0..*" Venta : efectúa
+Venta "1" *-- "1..*" DetalleVenta : contiene
+DetalleVenta "*" --> "1" Producto : referencia
+Arriendo "*" --> "1" Producto : arrienda
+@enduml
+
+' ---------- VISTA 3: PROCESOS (DIAGRAMA DE SECUENCIA) ----------
+@startuml Vista3_Procesos
+actor Vendedor
+participant "Web UI" as UI
+participant "API Gateway" as GW
+participant "Servicio Arriendos" as SA
+participant "Servicio Catálogo" as SC
+database "PostgreSQL" as DB
+
+Vendedor -> UI : Selecciona juego, días y cliente
+UI -> GW : POST /arriendos
+GW -> SC : verificarStock(idProducto)
+SC -> DB : SELECT stock
+DB --> SC : stock
+SC --> GW : disponible
+alt Stock disponible
+  GW -> SA : registrarArriendo()
+  SA -> SA : Aplicar 10% si esVIP
+  SA -> DB : INSERT arriendo
+  SA --> GW : arriendo creado
+  GW --> UI : 201 Created
+else Sin stock
+  GW --> UI : 409 Sin stock
+end
+
+== Devolución ==
+Vendedor -> UI : Registrar devolución
+UI -> GW : PUT /arriendos/{id}/devolucion
+GW -> SA : calcularMulta(diasAtraso)
+SA --> GW : multa = diasAtraso * 1500
+GW --> UI : Total a pagar
+@enduml
+
+' ---------- VISTA 4: DESARROLLO (COMPONENTES) ----------
+@startuml Vista4_Desarrollo
+package "Capa Presentación (Frontend)" {
+  [Componente Web UI] as UI
+  [Módulo Arriendos] as ModArriendo
+  [Módulo Carrito] as ModCarrito
+}
+package "Capa de Negocio (Backend API)" {
+  [API Gateway] as Gateway
+  [Servicio Catálogo] as ServCat
+  [Servicio Ventas] as ServVen
+  [Servicio Arriendos] as ServArr
+  [Servicio Fidelización] as ServVip
+}
+database "Capa de Datos" {
+  [DB Relacional SQL] as DB
+}
+
+UI --> Gateway
+ModArriendo --> Gateway
+ModCarrito --> Gateway
+Gateway --> ServCat
+Gateway --> ServVen
+Gateway --> ServArr
+Gateway --> ServVip
+ServCat --> DB
+ServVen --> DB
+ServArr --> DB
+ServVip --> DB
+@enduml
+
+' ---------- VISTA 5: DESPLIEGUE (NODOS E INFRAESTRUCTURA) ----------
+@startuml Vista5_Despliegue
+node "Cliente Web Browser" {
+  artifact "Single Page App (HTML5/JS)" as SPA
+}
+node "Servidor de Aplicaciones (Cloud)" {
+  component "Node.js / Express Server" as AppServer
+}
+node "Servidor de Base de Datos" {
+  database "PostgreSQL Database" as Database
+}
+
+SPA --> AppServer : HTTPS / API REST
+AppServer --> Database : TCP/IP (Puerto 5432)
+@enduml

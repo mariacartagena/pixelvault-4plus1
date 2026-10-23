@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PixelVault Games</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{font-family:Inter,sans-serif;background:#14112a;color:#e8e6f5}
+h1,h2,h3,.disp{font-family:'Chakra Petch',sans-serif}
+.panel{background:#1d1938;border:1px solid #2f2a56;border-radius:10px}
+.btn{background:#ff4d8d;color:#fff;border-radius:6px;padding:.45rem .9rem;font-weight:600;transition:filter .15s}
+.btn:hover{filter:brightness(1.1)}.btn:disabled{background:#3a3560;color:#8b86b0;cursor:not-allowed}
+.btn2{background:#2a2550;color:#e8e6f5}
+input,select{background:#14112a;border:1px solid #3a3560;border-radius:6px;padding:.4rem .6rem;color:#e8e6f5}
+:focus-visible{outline:2px solid #3de0ff;outline-offset:2px}
+.tab[aria-selected=true]{color:#3de0ff;border-bottom:2px solid #3de0ff}
+</style>
+</head>
+<body class="min-h-screen">
+<header class="border-b border-[#2f2a56] sticky top-0 z-10 bg-[#14112a]">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center gap-4">
+    <h1 class="text-2xl font-bold tracking-wide text-[#ff4d8d]">PixelVault <span class="text-[#3de0ff]">Games</span></h1>
+    <nav class="flex gap-5 ml-4" role="tablist">
+      <button class="tab py-2" role="tab" aria-selected="true" data-tab="catalogo">Catálogo</button>
+      <button class="tab py-2" role="tab" aria-selected="false" data-tab="arriendos">Arriendos</button>
+    </nav>
+    <label class="ml-auto flex items-center gap-2 cursor-pointer select-none">
+      <span class="text-sm">Modo Cliente VIP</span>
+      <input type="checkbox" id="vipToggle" class="sr-only peer">
+      <span class="w-11 h-6 rounded-full bg-[#3a3560] peer-checked:bg-[#ff4d8d] relative transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-[#3de0ff] after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5 after:bg-white after:rounded-full after:transition peer-checked:after:translate-x-5"></span>
+    </label>
+    <span class="text-sm panel px-3 py-1">Puntos: <b id="puntos" class="text-[#3de0ff]">0</b></span>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-6">
+  <!-- CATÁLOGO + CARRITO -->
+  <section id="tab-catalogo" class="grid lg:grid-cols-[1fr_340px] gap-6">
+    <div>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <input id="buscador" type="search" placeholder="Buscar juego o consola" class="flex-1 min-w-[180px]" aria-label="Buscar">
+        <select id="fPlataforma" aria-label="Plataforma"><option value="">Todas las plataformas</option><option>PS5</option><option>Xbox</option><option>Switch</option><option>PC</option></select>
+        <select id="fFormato" aria-label="Formato"><option value="">Físico y digital</option><option>Físico</option><option>Digital</option></select>
+      </div>
+      <div id="grid" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+    </div>
+    <aside class="panel p-4 h-fit lg:sticky lg:top-20">
+      <h2 class="text-lg font-bold mb-3">Carrito</h2>
+      <ul id="carrito" class="space-y-2 text-sm mb-3"></ul>
+      <div class="flex gap-2 mb-3">
+        <input id="cupon" placeholder="Cupón (ej: PIXEL10)" class="flex-1 min-w-0">
+        <button id="btnCupon" class="btn btn2">Aplicar</button>
+      </div>
+      <p id="msgCupon" class="text-xs mb-2 min-h-[1rem]"></p>
+      <dl class="text-sm space-y-1 border-t border-[#2f2a56] pt-3">
+        <div class="flex justify-between"><dt>Subtotal</dt><dd id="subtotal">$0</dd></div>
+        <div class="flex justify-between"><dt>Descuento cupón</dt><dd id="descuento">$0</dd></div>
+        <div class="flex justify-between"><dt>IVA (19%)</dt><dd id="iva">$0</dd></div>
+        <div class="flex justify-between text-lg font-bold text-[#3de0ff]"><dt>Total</dt><dd id="total">$0</dd></div>
+      </dl>
+      <button id="btnPagar" class="btn w-full mt-4" disabled>Pagar ahora</button>
+    </aside>
+  </section>
+
+  <!-- ARRIENDOS -->
+  <section id="tab-arriendos" class="hidden">
+    <div class="grid lg:grid-cols-[340px_1fr] gap-6">
+      <div class="panel p-4 h-fit">
+        <h2 class="text-lg font-bold mb-3">Nuevo arriendo</h2>
+        <label class="block text-sm mb-1" for="aProducto">Videojuego físico</label>
+        <select id="aProducto" class="w-full mb-3"></select>
+        <label class="block text-sm mb-1" for="aDias">Días de arriendo</label>
+        <input id="aDias" type="number" min="1" max="30" value="3" class="w-full mb-3">
+        <p class="text-sm">Tarifa: <b>$2.000</b> por día</p>
+        <p class="text-sm">Multa por mora: <b>$1.500</b> por día</p>
+        <p class="text-sm mt-2">Precio estimado: <b id="aPrecio" class="text-[#3de0ff]">$0</b> <span id="aVipTag" class="text-[#ff4d8d] text-xs"></span></p>
+        <button id="btnArrendar" class="btn w-full mt-4">Registrar arriendo</button>
+        <p id="msgArriendo" class="text-xs mt-2 min-h-[1rem]"></p>
+      </div>
+      <div>
+        <h2 class="text-lg font-bold mb-3">Arriendos activos</h2>
+        <div id="listaArriendos" class="space-y-3"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 panel px-4 py-2 text-sm hidden" role="status"></div>
+
+<script>
+// ===== Clases del dominio (Vista Lógica) =====
+const IVA = 0.19, TARIFA_DIA = 2000, MULTA_DIA = 1500, DESC_VIP = 0.10;
+const fmt = n => '$' + Math.round(n).toLocaleString('es-CL');
+
+class Producto {
+  constructor(id, nombre, plataforma, formato, precio, stock) {
+    Object.assign(this, { id, nombre, plataforma, formato, precio, stock });
+  }
+  verificarStock(cantidad = 1) { return this.stock >= cantidad; }
+}
+class Cliente {
+  constructor(rut, nombre) { this.rut = rut; this.nombre = nombre; this.esVIP = false; this.puntos = 0; }
+  acumularPuntos(monto) { if (this.esVIP) this.puntos += Math.floor(monto / 1000); }
+}
+class Arriendo {
+  constructor(idArriendo, producto, diasPactados, precio) {
+    this.idArriendo = idArriendo; this.producto = producto;
+    this.diasPactados = diasPactados; this.precio = precio;
+    this.fechaInicio = new Date();
+    this.fechaLimite = new Date(Date.now() + diasPactados * 864e5);
+    this.diasTranscurridos = 0; this.devuelto = false;
+  }
+  calcularMulta(diasAtraso) { return Math.max(0, diasAtraso) * MULTA_DIA; }
+  get diasAtraso() { return Math.max(0, this.diasTranscurridos - this.diasPactados); }
+}
+class Venta {
+  constructor(idVenta) { this.idVenta = idVenta; this.items = []; this.cuponPct = 0; }
+  get subtotal() { return this.items.reduce((s, i) => s + i.producto.precio * i.cantidad, 0); }
+  get descuento() { return this.subtotal * this.cuponPct; }
+  calcularImpuestos() { return (this.subtotal - this.descuento) * IVA; }
+  get total() { return this.subtotal - this.descuento + this.calcularImpuestos(); }
+}
+
+// ===== Estado =====
+const productos = [
+  new Producto('P01','Astral Knights II','PS5','Físico',59990,6),
+  new Producto('P02','Neon Drift GP','Xbox','Físico',49990,4),
+  new Producto('P03','Mushroom Kingdom Party','Switch','Físico',44990,8),
+  new Producto('P04','Void Protocol','PC','Digital',29990,99),
+  new Producto('P05','Dragon Isles','Switch','Digital',39990,99),
+  new Producto('P06','Gridiron Legacy 26','PS5','Digital',54990,99),
+  new Producto('P07','Stellar Frontier','Xbox','Físico',52990,3),
+  new Producto('P08','Pixel Farm Saga','PC','Físico',19990,5),
+  new Producto('P09','Control Pro Wireless','PS5','Físico',69990,2)
+];
+const cliente = new Cliente('12.345.678-9', 'Cliente Demo');
+let venta = new Venta('V001');
+const arriendos = [];
+let seq = 1;
+const $ = id => document.getElementById(id);
+
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.remove('hidden'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.add('hidden'),2200); }
+
+// ===== Catálogo =====
+function renderCatalogo(){
+  const q = $('buscador').value.toLowerCase(), pl = $('fPlataforma').value, fo = $('fFormato').value;
+  const lista = productos.filter(p => p.nombre.toLowerCase().includes(q) && (!pl || p.plataforma===pl) && (!fo || p.formato===fo));
+  $('grid').innerHTML = lista.length ? lista.map(p => `
+    <article class="panel p-4 flex flex-col">
+      <div class="flex justify-between text-xs mb-2"><span class="px-2 py-0.5 rounded bg-[#2a2550] text-[#3de0ff]">${p.plataforma}</span><span>${p.formato}</span></div>
+      <h3 class="font-bold text-lg leading-tight mb-1">${p.nombre}</h3>
+      <p class="text-xl text-[#ff4d8d] font-bold disp">${fmt(p.precio)}</p>
+      <p class="text-xs mt-1 ${p.stock<=3?'text-amber-400':'text-[#9a96c0]'}">${p.formato==='Digital'?'Entrega inmediata':'Stock: '+p.stock}</p>
+      <button class="btn mt-3" data-add="${p.id}" ${p.verificarStock()?'':'disabled'}>${p.verificarStock()?'Agregar al carrito':'Sin stock'}</button>
+    </article>`).join('') : '<p class="text-[#9a96c0]">Sin resultados. Prueba con otro filtro o término de búsqueda.</p>';
+}
+function agregar(id){
+  const p = productos.find(x=>x.id===id);
+  const item = venta.items.find(i=>i.producto.id===id);
+  const enCarrito = item ? item.cantidad : 0;
+  if (!p.verificarStock(1)) return toast('Sin stock disponible');
+  p.stock--; // descuenta stock
+  item ? item.cantidad++ : venta.items.push({producto:p, cantidad:1});
+  renderTodo();
+}
+function quitar(id){
+  const i = venta.items.findIndex(x=>x.producto.id===id); if(i<0) return;
+  const it = venta.items[i]; it.producto.stock++; it.cantidad--;
+  if(it.cantidad===0) venta.items.splice(i,1);
+  renderTodo();
+}
+function renderCarrito(){
+  $('carrito').innerHTML = venta.items.length ? venta.items.map(i => `
+    <li class="flex items-center justify-between gap-2">
+      <span class="flex-1 min-w-0 truncate">${i.producto.nombre}</span>
+      <button class="btn btn2 !px-2 !py-0" data-rem="${i.producto.id}" aria-label="Quitar uno">−</button>
+      <b>${i.cantidad}</b>
+      <button class="btn btn2 !px-2 !py-0" data-add="${i.producto.id}" aria-label="Agregar uno" ${i.producto.verificarStock()?'':'disabled'}>+</button>
+      <span class="w-20 text-right">${fmt(i.producto.precio*i.cantidad)}</span>
+    </li>`).join('') : '<li class="text-[#9a96c0]">Agrega juegos desde el catálogo.</li>';
+  $('subtotal').textContent = fmt(venta.subtotal);
+  $('descuento').textContent = '−' + fmt(venta.descuento);
+  $('iva').textContent = fmt(venta.calcularImpuestos());
+  $('total').textContent = fmt(venta.total);
+  $('btnPagar').disabled = !venta.items.length;
+}
+$('btnCupon').onclick = () => {
+  const ok = $('cupon').value.trim().toUpperCase() === 'PIXEL10';
+  venta.cuponPct = ok ? 0.10 : 0;
+  const m = $('msgCupon'); m.textContent = ok ? 'Cupón aplicado: 10% de descuento.' : 'Cupón no válido. Prueba con PIXEL10.';
+  m.className = 'text-xs mb-2 ' + (ok ? 'text-emerald-400' : 'text-amber-400');
+  renderCarrito();
+};
+$('btnPagar').onclick = () => {
+  const total = venta.total;
+  cliente.acumularPuntos(total);
+  toast(`Compra ${venta.idVenta} confirmada por ${fmt(total)}. ¡Gracias!`);
+  venta = new Venta('V' + String(++seq).padStart(3,'0'));
+  $('cupon').value=''; $('msgCupon').textContent='';
+  renderTodo();
+};
+
+// ===== Arriendos =====
+function precioArriendo(){
+  const dias = Math.max(1, parseInt($('aDias').value)||1);
+  const base = dias * TARIFA_DIA;
+  return cliente.esVIP ? base*(1-DESC_VIP) : base;
+}
+function renderFormArriendo(){
+  const fis = productos.filter(p=>p.formato==='Físico');
+  const sel = $('aProducto'), prev = sel.value;
+  sel.innerHTML = fis.map(p=>`<option value="${p.id}" ${p.verificarStock()?'':'disabled'}>${p.nombre} (${p.plataforma}) — stock ${p.stock}</option>`).join('');
+  if (prev) sel.value = prev;
+  $('aPrecio').textContent = fmt(precioArriendo());
+  $('aVipTag').textContent = cliente.esVIP ? '(10% VIP aplicado)' : '';
+}
+$('btnArrendar').onclick = () => {
+  const p = productos.find(x=>x.id===$('aProducto').value);
+  const dias = Math.max(1, parseInt($('aDias').value)||1);
+  const m = $('msgArriendo');
+  if(!p || !p.verificarStock()){ m.textContent='Este juego no tiene stock disponible.'; m.className='text-xs mt-2 text-amber-400'; return; }
+  p.stock--;
+  const precio = precioArriendo();
+  arriendos.push(new Arriendo('A' + String(++seq).padStart(3,'0'), p, dias, precio));
+  cliente.acumularPuntos(precio);
+  m.textContent='Arriendo registrado.'; m.className='text-xs mt-2 text-emerald-400';
+  renderTodo();
+};
+function renderArriendos(){
+  const act = arriendos.filter(a=>!a.devuelto);
+  $('listaArriendos').innerHTML = act.length ? act.map(a => {
+    const mora = a.calcularMulta(a.diasAtraso);
+    return `<div class="panel p-4 flex flex-wrap items-center gap-4">
+      <div class="flex-1 min-w-[180px]">
+        <h3 class="font-bold">${a.producto.nombre}</h3>
+        <p class="text-xs text-[#9a96c0]">${a.idArriendo} · ${a.diasPactados} días · vence ${a.fechaLimite.toLocaleDateString('es-CL')}</p>
+        <p class="text-xs">Arriendo: ${fmt(a.precio)}</p>
+      </div>
+      <label class="text-sm">Días transcurridos<br><input type="number" min="0" value="${a.diasTranscurridos}" data-dias="${a.idArriendo}" class="w-24 mt-1"></label>
+      <div class="text-sm w-32">${a.diasAtraso>0?`<span class="text-amber-400">${a.diasAtraso} día(s) de atraso</span><br>Multa: <b class="text-[#ff4d8d]">${fmt(mora)}</b>`:'<span class="text-emerald-400">A tiempo</span>'}</div>
+      <button class="btn" data-dev="${a.idArriendo}">Registrar devolución</button>
+    </div>`;}).join('') : '<p class="text-[#9a96c0]">No hay arriendos activos. Registra uno desde el formulario.</p>';
+}
+function devolver(id){
+  const a = arriendos.find(x=>x.idArriendo===id);
+  a.devuelto = true; a.producto.stock++;
+  const mora = a.calcularMulta(a.diasAtraso);
+  toast(mora ? `Devuelto con atraso. Multa a cobrar: ${fmt(mora)}` : 'Devuelto a tiempo. Sin multa.');
+  renderTodo();
+}
+
+// ===== Eventos y render global =====
+function renderTodo(){ renderCatalogo(); renderCarrito(); renderFormArriendo(); renderArriendos(); $('puntos').textContent = cliente.puntos; }
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if(!t) return;
+  if (t.dataset.add) agregar(t.dataset.add);
+  if (t.dataset.rem) quitar(t.dataset.rem);
+  if (t.dataset.dev) devolver(t.dataset.dev);
+  if (t.dataset.tab){
+    document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected', b===t));
+    $('tab-catalogo').classList.toggle('hidden', t.dataset.tab!=='catalogo');
+    $('tab-arriendos').classList.toggle('hidden', t.dataset.tab!=='arriendos');
+  }
+});
+document.addEventListener('input', e => {
+  if (e.target.dataset.dias){
+    const a = arriendos.find(x=>x.idArriendo===e.target.dataset.dias);
+    a.diasTranscurridos = Math.max(0, parseInt(e.target.value)||0);
+    const pos = e.target.selectionStart; renderArriendos();
+    const n = document.querySelector(`[data-dias="${a.idArriendo}"]`); n.focus(); n.setSelectionRange(pos,pos);
+  }
+});
+['buscador','fPlataforma','fFormato'].forEach(id => $(id).addEventListener('input', renderCatalogo));
+$('aDias').addEventListener('input', renderFormArriendo);
+$('aProducto').addEventListener('change', renderFormArriendo);
+$('vipToggle').addEventListener('change', e => { cliente.esVIP = e.target.checked; toast(cliente.esVIP ? 'Modo VIP activado: 10% en arriendos y puntos.' : 'Modo VIP desactivado.'); renderFormArriendo(); });
+renderTodo();
+</script>
+</body>
+</html>
